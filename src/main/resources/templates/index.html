@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>esay-connection</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/layui/css/layui.css" media="all">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">esay-connection</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    LXM
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="">退了</a></li>
+        </ul>
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" id="left"></ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <div style="width: 100%;height: 40%">
+            <div style="height: 20%;">
+                <button id="exec" style="margin: 6px 10px" class="layui-btn layui-btn-sm">运行</button>
+                <button id="clear" style="margin: 6px 10px" class="layui-btn layui-btn-sm">清除</button>
+                <button id="export" style="margin: 6px 10px" class="layui-btn layui-btn-sm">导出</button>
+            </div>
+            <div class="layui-input-block" style="height: 100%">
+                <textarea id="textarea1" style="border: none" placeholder="请输入查询语句" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div style="width: 100%;height: 60%">
+            <table id="tab1" lay-filter="tab1">
+
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © Liang.XiaoMin
+    </div>
+</div>
+</body>
+</html>
+<script src="/static/layui/layui.js" charset="utf-8"></script>
+<script>
+
+    var sqltype = '';
+
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'carousel', 'upload', 'element', 'slider'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var element = layui.element;
+
+        layui.$('#clear').on('click', function () {
+            $("#textarea1").val('');
+        });
+        layui.$('#export').on('click', function () {
+            if (sqltype == '') {
+                layer.msg('未选择连接库');
+                return;
+            }
+            if ($("#textarea1").val() == '') {
+                layer.msg('未输入查询语句');
+                return;
+            }
+            $.ajax({
+                url: '/common/export?sql=' + $("#textarea1").val() + '&type=' + sqltype, //数据接口
+                type: 'get',
+                async: false,
+                success: function (res) {
+                    //使用table.exportFile()导出数据
+                    table.exportFile('tab1', res.data, 'csv');
+                }
+            });
+        });
+
+        layui.$('#exec').on('click', function () {
+            if (sqltype == '') {
+                layer.msg('未选择连接库');
+                return;
+            }
+            if ($("#textarea1").val() == '') {
+                layer.msg('未输入查询语句');
+                return;
+            }
+
+
+            $.ajax({
+                url: '/common/query?sql=' + $("#textarea1").val() + '&limit=100&type=' + sqltype,
+                type: 'get',
+                async: false,
+                success: function (res) {
+                    if (res.code == 1){
+                        $("#tab1").html('');
+                        layer.open({
+                            title: '错误'
+                            , content: res.msg
+                        });
+                        return;
+                    }
+                    if (!res.fields || res.fields.length == 0) {
+                        layer.msg('未查询到数据');
+                        $("#tab1").html('');
+                        return;
+                    }
+
+                    var thmsg = '<thead><tr>';
+                    var tdmsg = '<tbody>';
+                    for (var i = 0; i < res.fields.length; i++) {
+                        thmsg += '<th lay-data="{field:\'t' + i + '\'}">' + res.fields[i] + '</th>';
+                    }
+                    for (var i = 0; i < res.data.length; i++) {
+                        tdmsg += '<tr>';
+                        for (var j = 0; j < res.fields.length; j++) {
+                            tdmsg += '<td>' + res.data[i][res.fields[j]] + '</td>';
+                        }
+                        tdmsg += '</tr>';
+                    }
+                    for (var key in res.data) {
+
+                    }
+                    thmsg += '</tr> </thead>';
+                    tdmsg += '</tbody>';
+                    $("#tab1").html(thmsg + tdmsg);
+                }
+            });
+            //转换静态表格
+            table.init('tab1', {
+                limit: 10 //注意：请务必确保 limit 参数（默认：10）是与你服务端限定的数据条数一致
+                , page: true
+                , text: {
+                    none: '未查询到数据'
+                }
+            });
+        })
+
+
+        function init() {
+            $.ajax({
+                url: "/common/getTitleList",
+                type: "get",
+                success: function (data) {
+                    if (data.code == '0') {
+                        var map = data.data;
+                        var innerHTML = '';
+                        for (var key in map) {
+                            if (key == 'mysql') {
+                                innerHTML += '<li class="layui-nav-item layui-nav-itemed">';
+                            } else {
+                                innerHTML += '<li class="layui-nav-item">';
+                            }
+                            innerHTML += '<a href="javascript:;">' + key + '</a>';
+                            for (var i = 0; i < map[key].length; i++) {
+                                if (i == 0) {
+                                    innerHTML += '<dl class="layui-nav-child">';
+                                }
+                                innerHTML += '<dd><a onclick="changetype(this)"  href="javascript:;">' + map[key][i] + '</a></dd>';
+                                if (i == map[key].length - 1) {
+                                    innerHTML += '</dl>';
+                                }
+                            }
+                            innerHTML += '</li>';
+                        }
+                        $("#left").html(innerHTML);
+                        element.render("nav");
+                    }
+                }
+            });
+        }
+
+        init();
+    });
+
+    function changetype(d) {
+        sqltype = d.parentElement.parentElement.parentElement.firstChild.innerText + ' ' + d.innerText;
+    }
+</script>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="@192.168.139.208" uuid="1d96578d-c1f7-4d61-9553-55645e9d9297">
+      <driver-ref>oracle</driver-ref>
+      <synchronize>true</synchronize>
+      <auto-commit>false</auto-commit>
+      <jdbc-driver>oracle.jdbc.driver.OracleDriver</jdbc-driver>
+      <jdbc-url>jdbc:oracle:thin:@192.168.139.208:49161:XE</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="PostgreSQL - db1@192.168.139.208" uuid="9bcc9d5b-cecf-4bbf-b7d0-229b297c2c03">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://192.168.139.208:5432/db1</jdbc-url>
+    </data-source>
+  </component>
+</project>

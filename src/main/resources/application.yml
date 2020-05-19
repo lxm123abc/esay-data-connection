@@ -1,0 +1,23 @@
+server:
+  port: 8888
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+  resources:
+    add-mappings: true #拒绝404界面给用户设置false # 设置为true时会最后匹配一次配置的静态资源地址是否存在，否则依旧会捕获
+  mvc:
+    throw-exception-if-no-handler-found: true #找不到conntroller抛出异常
+    static-path-pattern: /static/** #静态资源
+  #datasource:
+    #url: jdbc:mysql://127.0.0.1:3306/dianping?useUnicode=true&characterEncoding=utf-8
+    #username: root
+    #password: 123
+    #driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/dianping?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.mysql.cj.jdbc.MysqlConnectionPoolDataSource
+export.limit.max: 100000
